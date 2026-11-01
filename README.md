@@ -1,43 +1,49 @@
-# Astro Starter Kit: Minimal
+# Site da agência
 
-```sh
-npm create astro@latest -- --template minimal
+Site institucional e portfólio, em português e inglês.
+
+**Stack:** Astro 7 · TypeScript · Tailwind CSS 4 · Zod · Vitest · Vercel
+
+## Rodando localmente
+
+Requer Node 24 (veja `.nvmrc`).
+
+```bash
+npm install
+npm run dev        # http://localhost:4321
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+| Comando           | O que faz                                                |
+| ----------------- | -------------------------------------------------------- |
+| `npm run dev`     | Servidor de desenvolvimento                              |
+| `npm run build`   | Gera o site estático em `dist/`                          |
+| `npm run preview` | Serve o build localmente                                 |
+| `npm test`        | Testes unitários                                         |
+| `npm run verify`  | Lint + formatação + tipos + testes + build (igual ao CI) |
 
-## 🚀 Project Structure
+## Tarefas comuns
 
-Inside of your Astro project, you'll see the following folders and files:
+### Adicionar um projeto ao portfólio
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+1. Crie `src/content/cases/pt/<slug>.md` e `src/content/cases/en/<slug>.md` (mesmo slug).
+2. Copie o frontmatter de um case existente e preencha.
+3. Para a capa, coloque a imagem em `src/assets/cases/` e referencie: `cover: ../../../assets/cases/foto.jpg`.
+4. Use `draft: true` para esconder o case em produção enquanto ele não está pronto.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+O build falha se algum campo obrigatório estiver faltando.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+### Trocar nome da marca, WhatsApp ou redes
 
-Any static assets, like images, can be placed in the `public/` directory.
+Edite `src/config/site.ts`. Ao definir o domínio, atualize também `site` em `astro.config.mjs`.
 
-## 🧞 Commands
+### Ajustar cores e fontes
 
-All commands are run from the root of the project, from a terminal:
+Tokens em `src/styles/global.css` (bloco `@theme`).
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### Editar textos da interface
 
-## 👀 Want to learn more?
+`src/i18n/ui.ts`.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Deploy
+
+Conecte o repositório na Vercel. O framework é detectado automaticamente e os headers de segurança vêm de `vercel.json`.

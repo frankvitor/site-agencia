@@ -1,0 +1,23 @@
+---
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getLocaleFromUrl, useTranslations } from '@/i18n/utils';
+
+const t = useTranslations(getLocaleFromUrl(Astro.url));
+
+const steps = [1, 2, 3, 4] as const;
+---
+
+<section id="process" class="bg-ink-900 scroll-mt-24 py-24">
+  <div class="container-page">
+    <SectionHeading eyebrow={t('process.eyebrow')} title={t('process.title')} />
+    <ol class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {steps.map((n) => (
+        <li class="rounded-card border border-white/5 p-6">
+          <span class="font-display text-brand-400 text-5xl font-bold">0{n}</span>
+          <h3 class="font-display mt-4 text-xl font-semibold">{t(`process.${n}.title`)}</h3>
+          <p class="text-sand-300 mt-2 text-sm">{t(`process.${n}.text`)}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

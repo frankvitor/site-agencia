@@ -1,0 +1,17 @@
+---
+import { siteConfig } from '@/config/site';
+
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+// Destaca a letra central do nome, como na referência (STR[U]CT).
+const name = siteConfig.name;
+const mid = Math.floor(name.length / 2);
+---
+
+<a {href} class="font-display text-2xl font-extrabold tracking-tight" aria-label={name}>
+  <!-- prettier-ignore -->
+  <span>{name.slice(0, mid)}<span class="text-brand-500">{name[mid]}</span>{name.slice(mid + 1)}</span>
+</a>

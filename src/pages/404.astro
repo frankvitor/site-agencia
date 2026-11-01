@@ -1,0 +1,18 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import { getLocaleFromUrl, localizePath, useTranslations } from '@/i18n/utils';
+
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+---
+
+<BaseLayout title={t('notFound.title')}>
+  <section class="container-page bg-glow flex min-h-[70dvh] flex-col items-center justify-center text-center">
+    <p class="font-display text-brand-500 text-8xl font-bold">404</p>
+    <h1 class="font-display mt-4 text-3xl font-semibold">{t('notFound.title')}</h1>
+    <Button href={localizePath('/', locale)} class="mt-8">
+      {t('notFound.back')}
+    </Button>
+  </section>
+</BaseLayout>

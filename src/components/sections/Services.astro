@@ -1,0 +1,43 @@
+---
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getLocaleFromUrl, useTranslations } from '@/i18n/utils';
+import { getServices } from '@/lib/content';
+
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const services = await getServices(locale);
+---
+
+<section id="services" class="container-page scroll-mt-24 py-24">
+  <SectionHeading eyebrow={t('services.eyebrow')} title={t('services.title')} />
+
+  <ul class="mt-14 grid gap-5 md:grid-cols-2">
+    {services.map((service, i) => (
+      <li
+        class:list={[
+          'rounded-card flex flex-col p-8',
+          i === 0 ? 'bg-brand-gradient text-white' : 'bg-ink-800 border border-white/5',
+        ]}
+      >
+        <span class="font-display text-sm opacity-70">0{i + 1}</span>
+        <h3 class="font-display mt-6 text-2xl font-semibold uppercase">{service.data.title}</h3>
+        <p class:list={['mt-3', i === 0 ? 'text-white/85' : 'text-sand-300']}>{service.data.summary}</p>
+        <ul class="mt-6 space-y-2 text-sm">
+          {service.data.highlights.map((h) => (
+            <li class="flex gap-2">
+              <span aria-hidden="true">→</span>
+              {h}
+            </li>
+          ))}
+        </ul>
+        <a
+          href="#contact"
+          data-service={service.data.title}
+          class="mt-8 self-start text-sm font-semibold underline decoration-2 underline-offset-4"
+        >
+          {t('services.more')}
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>

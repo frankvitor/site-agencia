@@ -1,0 +1,30 @@
+---
+import Logo from '@/components/ui/Logo.astro';
+import { siteConfig } from '@/config/site';
+import { getLocaleFromUrl, localizePath, useTranslations } from '@/i18n/utils';
+
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-white/5 py-12">
+  <div class="container-page flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+    <Logo href={localizePath('/', locale)} />
+    <ul class="text-sand-300 flex gap-6 text-sm">
+      <li>
+        <a href={siteConfig.socials.instagram} rel="noopener noreferrer" target="_blank" class="hover:text-white">
+          Instagram
+        </a>
+      </li>
+      <li>
+        <a href={siteConfig.socials.linkedin} rel="noopener noreferrer" target="_blank" class="hover:text-white">
+          LinkedIn
+        </a>
+      </li>
+    </ul>
+    <p class="text-sand-500 text-sm">
+      © {year} {siteConfig.name}. {t('footer.rights')}
+    </p>
+  </div>
+</footer>

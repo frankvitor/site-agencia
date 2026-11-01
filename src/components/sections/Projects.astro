@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getLocaleFromUrl, localizePath, useTranslations } from '@/i18n/utils';
+import { entrySlug, getCases } from '@/lib/content';
+
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const cases = await getCases(locale);
+---
+
+<section id="projects" class="container-page scroll-mt-24 py-24">
+  <SectionHeading eyebrow={t('projects.eyebrow')} title={t('projects.title')} />
+
+  <ul class="mt-14 grid gap-6 md:grid-cols-2">
+    {cases.map((item) => (
+      <li>
+        <a
+          href={localizePath(`/projects/${entrySlug(item)}/`, locale)}
+          class="group rounded-card bg-ink-800 block overflow-hidden border border-white/5 transition hover:border-brand-500/50"
+        >
+          <div class="bg-glow aspect-[16/10] overflow-hidden">
+            {item.data.cover && (
+              <Image
+                src={item.data.cover}
+                alt={item.data.coverAlt ?? item.data.title}
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 768px) 50vw, 100vw"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+            )}
+          </div>
+          <div class="p-7">
+            <p class="text-brand-400 text-xs font-semibold tracking-widest uppercase">
+              {item.data.client} · {item.data.year}
+            </p>
+            <h3 class="font-display mt-2 text-2xl font-semibold">{item.data.title}</h3>
+            <p class="text-sand-300 mt-2 text-sm">{item.data.summary}</p>
+            <span class="mt-5 inline-block text-sm font-semibold group-hover:text-brand-300">
+              {t('projects.view')} →
+            </span>
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>

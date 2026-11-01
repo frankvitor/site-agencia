@@ -1,0 +1,22 @@
+---
+import { locales, localeMeta } from '@/i18n/config';
+import { getLocaleFromUrl, switchLocalePath } from '@/i18n/utils';
+
+const current = getLocaleFromUrl(Astro.url);
+---
+
+<nav aria-label="Language" class="flex rounded-full border border-white/15 p-1 text-xs font-semibold">
+  {locales.map((l) => (
+    <a
+      href={switchLocalePath(Astro.url.pathname, l)}
+      hreflang={localeMeta[l].htmlLang}
+      aria-current={l === current ? 'true' : undefined}
+      class:list={[
+        'rounded-full px-3 py-1 transition',
+        l === current ? 'bg-sand-50 text-ink-950' : 'text-sand-300 hover:text-white',
+      ]}
+    >
+      {localeMeta[l].label}
+    </a>
+  ))}
+</nav>

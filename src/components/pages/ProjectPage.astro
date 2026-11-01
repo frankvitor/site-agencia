@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import { getLocaleFromUrl, localizePath, useTranslations } from '@/i18n/utils';
+
+interface Props {
+  entry: CollectionEntry<'cases'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <article class="container-page py-16">
+    <a href={`${localizePath('/', locale)}#projects`} class="text-sand-300 text-sm hover:text-white">
+      ← {t('projects.back')}
+    </a>
+
+    <header class="mt-8 max-w-4xl">
+      <h1 class="font-display text-4xl leading-tight font-semibold text-balance sm:text-6xl">{data.title}</h1>
+      <p class="text-sand-300 mt-6 text-lg">{data.summary}</p>
+    </header>
+
+    <dl class="mt-10 grid gap-6 border-y border-white/10 py-8 sm:grid-cols-3">
+      <div>
+        <dt class="text-sand-500 text-xs tracking-widest uppercase">{t('projects.client')}</dt>
+        <dd class="mt-1 font-semibold">{data.client}</dd>
+      </div>
+      <div>
+        <dt class="text-sand-500 text-xs tracking-widest uppercase">{t('projects.year')}</dt>
+        <dd class="mt-1 font-semibold">{data.year}</dd>
+      </div>
+      <div>
+        <dt class="text-sand-500 text-xs tracking-widest uppercase">{t('projects.services')}</dt>
+        <dd class="mt-1 font-semibold">{data.services.join(' · ')}</dd>
+      </div>
+    </dl>
+
+    {data.cover && (
+      <Image
+        src={data.cover}
+        alt={data.coverAlt ?? data.title}
+        widths={[800, 1280, 1920]}
+        sizes="100vw"
+        class="rounded-card mt-12 w-full"
+        loading="eager"
+      />
+    )}
+
+    {data.results.length > 0 && (
+      <section class="mt-12">
+        <h2 class="sr-only">{t('projects.results')}</h2>
+        <ul class="grid gap-5 sm:grid-cols-3">
+          {data.results.map((r) => (
+            <li class="rounded-card bg-brand-gradient p-6">
+              <p class="font-display text-4xl font-bold">{r.value}</p>
+              <p class="mt-1 text-white/85">{r.label}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <div class="prose-case text-sand-300 mt-12 max-w-3xl space-y-4">
+      <Content />
+    </div>
+
+    <div class="mt-16">
+      <Button href={`${localizePath('/', locale)}#contact`}>{t('hero.cta')}</Button>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose-case :global(h2) {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-sand-50);
+    margin-top: 2rem;
+  }
+</style>

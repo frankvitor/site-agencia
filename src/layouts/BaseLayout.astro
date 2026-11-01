@@ -1,0 +1,63 @@
+---
+import '@/styles/global.css';
+import { siteConfig } from '@/config/site';
+import { locales, localeMeta } from '@/i18n/config';
+import { getLocaleFromUrl, switchLocalePath, useTranslations } from '@/i18n/utils';
+import Header from '@/components/sections/Header.astro';
+import Footer from '@/components/sections/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const { title, description = t('meta.description') } = Astro.props;
+
+const fullTitle = title ? `${title} | ${siteConfig.name}` : `${siteConfig.name} — ${t('meta.title')}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={localeMeta[locale].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {locales.map((l) => (
+      <link
+        rel="alternate"
+        hreflang={localeMeta[l].htmlLang}
+        href={new URL(switchLocalePath(Astro.url.pathname, l), Astro.site)}
+      />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL(switchLocalePath(Astro.url.pathname, 'pt'), Astro.site)} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={localeMeta[locale].ogLocale} />
+    <meta name="theme-color" content="#080605" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+  </head>
+  <body class="min-h-dvh">
+    <a
+      href="#main"
+      class="bg-brand-500 sr-only z-50 rounded-full px-4 py-2 text-sm font-semibold focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
+    >
+      {t('nav.skip')}
+    </a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

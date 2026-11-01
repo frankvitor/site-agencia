@@ -1,0 +1,127 @@
+---
+import Button from '@/components/ui/Button.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { siteConfig } from '@/config/site';
+import { getLocaleFromUrl, useTranslations } from '@/i18n/utils';
+import { getServices } from '@/lib/content';
+import { LEAD_MESSAGE_MAX } from '@/lib/leads/lead';
+
+const locale = getLocaleFromUrl(Astro.url);
+const t = useTranslations(locale);
+const services = await getServices(locale);
+
+// Textos que o script do cliente precisa, serializados no próprio formulário.
+const clientConfig = {
+  phone: siteConfig.whatsapp.phone,
+  labels: {
+    greeting: t('contact.whatsapp.greeting'),
+    name: t('contact.whatsapp.name'),
+    service: t('contact.whatsapp.service'),
+    message: t('contact.whatsapp.message'),
+  },
+  errors: {
+    name: t('contact.error.name'),
+    service: t('contact.error.service'),
+    message: t('contact.error.message'),
+  },
+};
+
+const field =
+  'bg-ink-900 w-full rounded-2xl border border-white/10 px-5 py-4 text-sand-50 placeholder:text-sand-500 focus:border-brand-400 focus:outline-none';
+---
+
+<section id="contact" class="container-page scroll-mt-24 py-24">
+  <div class="rounded-card bg-glow bg-ink-900 grid gap-12 border border-white/5 p-8 sm:p-12 lg:grid-cols-2">
+    <div>
+      <SectionHeading eyebrow={t('contact.eyebrow')} title={t('contact.title')} />
+      <p class="text-sand-300 mt-6 max-w-md">{t('contact.subtitle')}</p>
+    </div>
+
+    <form id="lead-form" novalidate data-config={JSON.stringify(clientConfig)} class="flex flex-col gap-4">
+      <div>
+        <label for="lead-name" class="mb-2 block text-sm font-semibold">
+          {t('contact.name')}
+        </label>
+        <input id="lead-name" name="name" autocomplete="name" required minlength="2" maxlength="80" class={field} />
+        <p data-error-for="name" class="mt-1 hidden text-sm text-red-400" role="alert"></p>
+      </div>
+
+      <div>
+        <label for="lead-service" class="mb-2 block text-sm font-semibold">
+          {t('contact.service')}
+        </label>
+        <select id="lead-service" name="service" required class={field}>
+          <option value="">{t('contact.service.placeholder')}</option>
+          {services.map((s) => (
+            <option value={s.data.title}>{s.data.title}</option>
+          ))}
+        </select>
+        <p data-error-for="service" class="mt-1 hidden text-sm text-red-400" role="alert"></p>
+      </div>
+
+      <div>
+        <label for="lead-message" class="mb-2 block text-sm font-semibold">
+          {t('contact.message')}
+        </label>
+        <textarea id="lead-message" name="message" rows="4" maxlength={LEAD_MESSAGE_MAX} class={field}></textarea>
+        <p data-error-for="message" class="mt-1 hidden text-sm text-red-400" role="alert"></p>
+      </div>
+
+      <Button type="submit" class="mt-2 self-start">
+        {t('contact.submit')}
+      </Button>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { leadSchema, formatLeadMessage, type LeadMessageLabels } from '@/lib/leads/lead';
+  import { WhatsAppChannel } from '@/lib/leads/channel';
+  import { trackEvent } from '@/lib/analytics';
+
+  interface ClientConfig {
+    phone: string;
+    labels: LeadMessageLabels;
+    errors: Record<'name' | 'service' | 'message', string>;
+  }
+
+  const form = document.querySelector<HTMLFormElement>('#lead-form');
+
+  if (form) {
+    const config = JSON.parse(form.dataset.config ?? '{}') as ClientConfig;
+    const channel = new WhatsAppChannel(config.phone);
+    const serviceSelect = form.querySelector<HTMLSelectElement>('[name="service"]');
+
+    // "Quero esse serviço" pré-seleciona o serviço no formulário.
+    document.querySelectorAll<HTMLAnchorElement>('[data-service]').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (serviceSelect) serviceSelect.value = link.dataset.service ?? '';
+      });
+    });
+
+    const showErrors = (fields: Set<string>) => {
+      form.querySelectorAll<HTMLElement>('[data-error-for]').forEach((el) => {
+        const key = el.dataset.errorFor as keyof ClientConfig['errors'];
+        const hasError = fields.has(key);
+        el.textContent = hasError ? config.errors[key] : '';
+        el.classList.toggle('hidden', !hasError);
+        form.querySelector(`[name="${key}"]`)?.setAttribute('aria-invalid', String(hasError));
+      });
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const result = leadSchema.safeParse(Object.fromEntries(new FormData(form)));
+
+      if (!result.success) {
+        showErrors(new Set(result.error.issues.map((issue) => String(issue.path[0]))));
+        return;
+      }
+
+      showErrors(new Set());
+      trackEvent('generate_lead', { service: result.data.service, channel: 'whatsapp' });
+      channel.send(formatLeadMessage(result.data, config.labels));
+      form.reset();
+    });
+  }
+</script>
